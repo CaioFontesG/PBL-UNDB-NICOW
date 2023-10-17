@@ -1,6 +1,8 @@
 #PBL 3
 import pickle
 import os
+from time import sleep
+
 
 def carregar_dados(arquivo_nome, default):
     if os.path.exists(arquivo_nome):
@@ -8,6 +10,14 @@ def carregar_dados(arquivo_nome, default):
             return pickle.load(arquivo)
     else:
         return default
+    
+def mensagem(msg):
+    limpartela()
+    print(separador)
+    print(f"{yellow}{msg:^{len(separador)}}{amarelo}")
+    
+def limpartela():
+    os.system("cls")
 
 def salvar_dados(arquivo_nome, dados):
     with open(arquivo_nome, "wb") as arquivo:
@@ -15,9 +25,7 @@ def salvar_dados(arquivo_nome, dados):
 
 # Carregar dados
 lista_de_produtos = carregar_dados("lista_de_produtos.pkl", [])
-grupo = carregar_dados("grupo.pkl", {})
 produto = carregar_dados("produto.pkl", {})
-
 somatorio = sum(produto['quantidade'] for produto in lista_de_produtos)
 
 quantidade = menu = contador = 0
@@ -32,9 +40,7 @@ red = '\033[31m'
 vermelho = '\033[0m'
 separador = '=' * 50
 
-print(separador)
-print(f"{yellow}PROGRAMA INICIADO{amarelo}".center(50))
-print(separador)
+mensagem("PROGRAMA INICIADO")
 
 while True:
     print("Digite o login e depois a senha")
@@ -42,11 +48,17 @@ while True:
     tentativa_senha = input("Senha: ")
     contador += 1
     if tentativa_login == 'admin' and tentativa_senha == '@dmiN':
-        print(separador)
-        print(f"{yellow}Acesso permitido.{amarelo}".center(50))
-        print(separador)
+        mensagem("Carregando...")
+        sleep(0.5)
+        limpartela()
         while True:
-            
+
+             # Serializa em bytes as informações e atualiza a variável somatório, a lista e os dicionários.
+            somatorio = sum(produto['quantidade'] for produto in lista_de_produtos)
+            salvar_dados("lista_de_produtos.pkl", lista_de_produtos)
+            salvar_dados("produto.pkl", produto)
+
+            print(separador)
             print(f'{yellow}MENU PRINCIPAL{amarelo}'.center(50))
             menu = input('''1. Registrar compra de produtos.
 2. Registrar venda no estoque.
@@ -54,36 +66,35 @@ while True:
 4. Edição de produtos.
 Digite a opção (ou 'sair' para encerrar o programa): ''')
                         
-            if menu == '1':         
+            if menu == '1':      
+                limpartela()   
                 while True:      
                     print(separador)
                     print(f"{yellow}Inscrição de produto{amarelo}".center(50))
                                     
                     nome = input("Digite o nome do produto (ou 'sair'para encerrar): ")
                     if nome.lower() == 'sair':
+                        limpartela()
                         break
 
                     categoria = input("Digite a categoria do produto (ou 'sair' para encerrar): ")
                     if categoria.lower() == 'sair':
+                        limpartela()
                         break
 
-                    quantidade = int(input("Digite a quantidade do produto (ou 0 para encerrar):"))
+                    quantidade = int(input("Digite a quantidade do produto (ou 0 para encerrar): "))
                     if quantidade == 0:
+                        limpartela()
                         break
                     while quantidade < MINIMO:
                         print(f"Quantidade inválida! Mínimo de {MINIMO}")
                         quantidade = int(input("Digite a quantidade do produto (ou 0 para encerrar):"))
                         if quantidade == 0:
+                            limpartela()
                             break
 
                     # Atualiza o laço
                     contador += 1
-
-                    # Verifica se no dicionário grupo existe a categoria, se sim, adiciona a quantidade, se não, cria uma nova
-                    if categoria in grupo:
-                        grupo[categoria] += quantidade
-                    else:
-                        grupo[categoria] = quantidade
 
                     # Adiciona a categoria e quantidade ao dicionário do produto e adiciona o produto à lista
                     produto = {'nome': nome, 'categoria': categoria, 'quantidade': quantidade}
@@ -92,6 +103,7 @@ Digite a opção (ou 'sair' para encerrar o programa): ''')
                         lista_de_produtos.pop(-1)
 
             elif menu == '2':
+                mensagem("Venda de produtos.")
                 print("Selecione o produto que foi vendido: ")
                 for i, produto in enumerate(lista_de_produtos, start=1):
                     print(f"{i}. Nome: {produto['nome']}, Categoria: {produto['categoria']}, Quantidade: {produto['quantidade']}")
@@ -99,10 +111,10 @@ Digite a opção (ou 'sair' para encerrar o programa): ''')
                 escolha = int(input("Digite o número do produto (ou 0 para sair): "))
                 if 1 <= escolha <= len(lista_de_produtos):
                     produto_selecionado = lista_de_produtos[escolha - 1]
+                    mensagem("Venda de produtos.")
                     quantidade_saida = int(input(f"Digite a quantidade a ser retirada do produto '{produto_selecionado['nome']}': "))
                     if quantidade_saida <= produto_selecionado['quantidade']:
                         produto_selecionado['quantidade'] -= quantidade_saida
-                        grupo[produto_selecionado['categoria']] -= quantidade_saida
                         
                         print(f"\033[93m{quantidade_saida} unidades retiradas com sucesso do produto '{produto_selecionado['nome']}'\033[0m")
                     else:
@@ -114,12 +126,13 @@ Digite a opção (ou 'sair' para encerrar o programa): ''')
                 else:
                     print(f"{red}Escolha inválida{vermelho}".center(50))
 
-            elif menu == '3':                                                            
-                print(separador)
-                print(f'{yellow}Visualização dos produtos{amarelo}'.center(50))
+            elif menu == '3':
+                limpartela()                                                    
+                mensagem("Visualização dos produtos.")
                 menu_3 = input("1. Total de produtos.\n2. Produtos por categoria.\n3. Produtos abaixo do mínimo.\nDigite a opção (ou sair): ")
                 print(separador)
                 while True:
+                    limpartela()
                     if menu_3 == '1':
                         print(separador)
                         print(f"{yellow}O total de produtos é: {somatorio}{amarelo}".center(50))
@@ -127,16 +140,37 @@ Digite a opção (ou 'sair' para encerrar o programa): ''')
                             for z, x in enumerate(lista_de_produtos, start= 1):
                                 print(z, x)
                             print(separador)
-                        break
+                        s41r = input("Digite 'sair' para encerrar: ")
+                        if s41r.lower().strip() == 'sair':
+                            limpartela()
+                            break
+                        else:
+                            print("Opção inválida!")
 
                     elif menu_3 == '2':
+                        mensagem("Produtos por categoria.")
                         if len(lista_de_produtos) == 0:
-                            print("\033[93mO programa ainda não tem produtos em estoque.\033[0m")
+                            print(f"{yellow}O programa ainda não tem produtos em estoque.{amarelo}")
                         else:
+                            grupo = {}
+                            for produto in lista_de_produtos:
+                                categoria = produto['categoria']
+                                quantidade = produto['quantidade']
+                                if categoria not in grupo:
+                                    grupo[categoria] = quantidade
+                                else:
+                                    grupo[categoria] += quantidade
+
                             for categoria, quantidade_categoria in grupo.items():
                                 porcentagem = (quantidade_categoria / somatorio) * 100
                                 print(f"{yellow}A porcentagem de produtos na categoria '{categoria}' é: {porcentagem:.2f}%{amarelo}")
-                        break
+                        s41r = (input("Digite 'sair' para encerrar: "))
+                        if s41r.lower().strip() == 'sair':
+                            limpartela()
+                            break
+                        else:
+                            print('Opção inválida!')
+                        
 
                     elif menu_3 == '3':
                         produtos_abaixo_do_minimo = []
@@ -145,104 +179,126 @@ Digite a opção (ou 'sair' para encerrar o programa): ''')
                                 produtos_abaixo_do_minimo.append(produto)
 
                         if produtos_abaixo_do_minimo:
-                            print("\033[93mProdutos abaixo do estoque mínimo:\033[0m")
+                            print(separador)
+                            print(f"{yellow}Produtos abaixo do estoque mínimo:{amarelo}".center(50))
                             for produto in produtos_abaixo_do_minimo:
                                 print(f"Nome: {produto['nome']}, Categoria: {produto['categoria']}, Quantidade: {produto['quantidade']}")
                         else:
-                            print("\033[93mNão há necessidade de fazer um novo pedido.\033[0m")
-                        break
+                            print(f"{yellow}Não há necessidade de fazer um novo pedido.{amarelo}")
+                        print(separador)
+                        s41r = (input("Digite 'sair' para encerrar: "))
+                        if s41r.lower().strip() == 'sair':
+                            limpartela()
+                            break
+                            
+                        else:
+                            print('Opção inválida!')
                     
                     elif menu_3.lower() == 'sair':
+                        limpartela()
                         break
 
             elif menu == '4':
-                menu_4 = int(input('1. Apagar produto\n2. Editar produto(nome ou categoria)\nDigite a opção: '))
                 while True:
-                    if menu_4 == 1:
-                        for z, x in enumerate(lista_de_produtos, start= 1):
-                            print(z, x)                     
-                        escolha_menu_4 = int(input("Digite a opção que deseja apagar completamente: "))
-                        temp_1 = lista_de_produtos[escolha_menu_4 - 1]['categoria']
-                        temp_2 = lista_de_produtos[escolha_menu_4 - 1]['quantidade']
-                        grupo[temp_1] -= temp_2
-                        if grupo[temp_1] == 0:
-                            del(grupo[temp_1])
-                        del(lista_de_produtos[escolha_menu_4 - 1])
-                        print(separador)
-                        print(f"{yellow}Apagado!{amarelo}".center(50))
-                        print(separador)
+                    
+                    mensagem("Edição de produtos.")
+                    
+                    menu_4 = input("1. Apagar produto\n2. Editar produto(nome ou categoria)\nDigite a opção (ou 'sair' para encerrar): ")
+                    limpartela()
+                    
+                    if menu_4 == 'sair':
+                        limpartela()
                         break
-                    if menu_4 == 2:
-                        for i, produto in enumerate(lista_de_produtos, start=1):
-                            print(f"{i}. Nome: {produto['nome']}, Categoria: {produto['categoria']}")
-                        escolha_menu_4 = int(input("Escolha a opção que deseja editar: "))
-                        temp_1 = lista_de_produtos[escolha_menu_4 - 1]['categoria']
-                        temp_2 = lista_de_produtos[escolha_menu_4 - 1]['quantidade']
-                        print(separador)
-                        print(f"{yellow}Produto {lista_de_produtos[escolha_menu_4 - 1]['nome']}, da categoria {lista_de_produtos[escolha_menu_4 - 1]['categoria']} escolhido.{amarelo}".center(50))
-                        esc_menu_4_2 = int(input("1.Editar nome\n2.Editar categoria\nDigite a opção: "))
-                        if esc_menu_4_2 == 1:
-                            print("Escolha 1")
-                            novo_nome = input("Digite o novo nome do produto: ")
-                            lista_de_produtos[escolha_menu_4 - 1]['nome'] = novo_nome
-                            print("Novo nome registrado.")
-                        
-                        if esc_menu_4_2 == 2:
-                            print("Escolha 2")
-                            nova_categoria = str(input("Digite a nova categoria do produto: "))
-                            lista_de_produtos[escolha_menu_4 - 1]['categoria'] = nova_categoria
-                            if nova_categoria in grupo:
-                                grupo[nova_categoria] += temp_2
-                                grupo[temp_1] -= temp_2
-                                if grupo[temp_1] == 0:
-                                    del(grupo[temp_1])
-                            else:
-                                grupo[nova_categoria] = temp_2                         
-                        else:
-                            print("Escolha inválida")
+                                        
+                    if menu_4 == '1':
 
-                        break
-                                                                   
+                            while True:
+                                mensagem("Apagar produtos.")
+                                
+                                for z, x in enumerate(lista_de_produtos, start=1):
+                                    print(z, x)
+                                escolha_menu_4 = int(input("Digite a opção que deseja apagar completamente (ou '0' para encerrar): "))
+                                
+                                if escolha_menu_4 == 0:
+                                    limpartela()
+                                    break
+                                
+                                if 0 < escolha_menu_4 <= len(lista_de_produtos):
+                                    escolha_menu_4 -= 1
+                                    del(lista_de_produtos[escolha_menu_4])                                        
+                                
+                                else:
+                                    print("Por favor digite uma opção válida.")
+
+                    if menu_4 == '2':
+                        
+                        while True:
+                            
+                            mensagem("Editar produtos.")
+                            
+                            for i, produto in enumerate(lista_de_produtos, start=1):
+                                print(f"{i}. Nome: {produto['nome']}, Categoria: {produto['categoria']}")
+                            print()
+                            
+                            escolha_menu_4 = int(input("Digite o n° do produto que deseja editar:  (ou '0' para encerrar): "))
+                            
+                            if escolha_menu_4 == 0:
+                                limpartela()
+                                break
+
+                            if 0 < escolha_menu_4 <= len(lista_de_produtos):
+                                
+                                temp_categoria = lista_de_produtos[escolha_menu_4 - 1]['categoria']
+                                temp_quantidade = lista_de_produtos[escolha_menu_4 - 1]['quantidade']
+                                
+                                print(separador)
+                                print(f"{yellow}Produto '{lista_de_produtos[escolha_menu_4 - 1]['nome']}', da categoria '{lista_de_produtos[escolha_menu_4 - 1]['categoria']}' escolhido.{amarelo}".center(50))
+                                
+                                esc_menu_4_2 = int(input("1.Editar nome\n2.Editar categoria\nDigite a opção: "))
+                                
+                                if esc_menu_4_2 == 1:
+                                    
+                                    novo_nome = input("Digite o novo nome do produto (ou 'sair' para encerrar): ")
+                                    if novo_nome == 'sair':
+                                        break
+                                    lista_de_produtos[escolha_menu_4 - 1]['nome'] = novo_nome
+                                    print("Novo nome registrado.")
+                                
+                                elif esc_menu_4_2 == 2:
+                                    
+                                    nova_categoria = str(input("Digite a nova categoria do produto (ou 'sair para encerrar): "))
+                                    
+                                    if nova_categoria ==' sair':
+                                        break
+                                    
+                                    lista_de_produtos[escolha_menu_4 - 1]['categoria'] = nova_categoria
+                                    
+                                    break
+                                
+                                else:
+                                    print("Opção inválida. Digite um número de opção válido.")
+                                            
                     else:
                         print(separador)
                         print(f"{yellow}Opção incorreta!{amarelo}".center(50))
-                        break
-            
-            elif menu == '5':
-                print(grupo)
-                grupo = {}
-                salvar_dados("grupo.pkl", grupo)
-            
+                
             elif menu.lower() == 'sair':
-                print(separador)
-                print(f"{yellow}Programa encerrado.{amarelo}".center(50))
-                print(separador)
                 break 
             
             else:
+                limpartela()
                 print(separador)
                 print(f"{yellow}Operação inválida. Escolha novamente.{amarelo}".center(50))
-                print(separador)
-
-            # Serializa em bytes as informações e atualiza a variável somatório, as listas e os dicionários.
-            somatorio = sum(produto['quantidade'] for produto in lista_de_produtos)
-            salvar_dados("lista_de_produtos.pkl", lista_de_produtos)
-            salvar_dados("grupo.pkl", grupo)
-            salvar_dados("produto.pkl", produto)
-        
-        
+            
         if menu.lower() == 'sair':
-            print(separador)
-            print(f"{yellow}Programa encerrado.{amarelo}".center(50))
-            print(separador)
+            mensagem("Programa Encerrado.")
             break
 
     else:
+        limpartela()
         print(separador)
         print(f"{red}Login ou senha incorretos. {3 - contador} tentativas restantes.{vermelho}".center(50))
         print(separador)
         if ((3 - contador) == 0):
-          print(separador)
-          print(f"{yellow}Programa encerrado{amarelo}")
-          print(separador)
+          mensagem("Programa Encerrado.")
           break
