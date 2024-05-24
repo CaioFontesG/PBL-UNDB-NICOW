@@ -1,0 +1,1 @@
+Esse programa foi criado para resolução de uma atividade PBL na qual tivemos que criar uma pequena solução para as atividades do estoque de uma empresa de artigos esportivos. Foi o código que eu e minha equipe fizemos na cadeira de Algoritmos e Programação do curso de engenharia de software do Centro Universitário Dom Bosco - UNDB.
